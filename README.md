@@ -158,11 +158,17 @@ CCL, clients can choose to be notified of all relevant events and callbacks.
 List of dependencies:
 - android-support-v7-appcompat
 - android-support-v7-mediarouter
-- Google Play Services - the Base and Cast components
+- Google Play Services (the Base and Cast components)
+
+_**Remark.** Make sure you use the v7 support version of the MediaRouter
+library and not the one that is included in the Android framework._
 
 Since the two support libraries contribute resources as well, you cannot simply
 satisfy the dependency by including their jar files; instead you need to import
 them as library projects in Eclipse or in AAR packaged format in Android Studio.
+See the Support Library
+[Setup](http://developer.android.com/tools/support-library/setup.html) for how
+to do this.
 
 Your client project needs to list CCL as its only dependency for Cast related
 functionalities. In other words, your client application does not need to
@@ -234,8 +240,12 @@ Player Control page, the third argument to `initialize()` should be set to
 
 4. A namespace for a custom data channel. Leave this as `null` if no custom data
 channel is required. See the section on
-[data channel](#single-custom-data-channel) later in this document to see how
+[data channels](#single-custom-data-channel) later in this document to see how
 this can be used.
+
+_**Note:** `initialize()` will log an error message if it detects that an
+incompatible version of Google Play Service is installed, missing, or not
+activated._
 
 CCL has a number of features that are disabled by default. Immediately after the
 initialization, clients should inform the `VideoCastManager` what features they
@@ -311,7 +321,7 @@ inherits from `FragmentActivity` see the next section for
 	mCastManager.decrementUiCounter();
 	```
 
-Now you have a Cast button in your Action Bar and the VideoCastManager will be
+Now you have a Cast button in your Action Bar, and the VideoCastManager will be
 in charge of all the plumbing needed to provide the appropriate dialogs, etc.
 
 CCL also provides a custom Cast MediaRouter dialog when the client is connected:
@@ -375,7 +385,8 @@ The Mini-Controller is a small, persistent component that enables users to:
 
 It also provides an extended component to show the "upcoming" item in your queue
 if you have a queue with auto-play turned on. The Mini-Controller should be
-visible **if and only if** the remote video is playing.
+visible **if and only if** the remote video is playing. For audio-only content
+such as music, you might need to have to component available for local playback.
 
 CCL provides a compound component for the Mini-Controller that can be added to
 the layout XML of your pages. Here is an example:
@@ -638,7 +649,9 @@ The Cast SDK provides a number of APIs that can be used to:
 - define tracks,
 - associate them with a media (video) object,
 - set or update active tracks for a media,
-- and set or update the style for a text track.
+- and set or update the style for a text track. See
+[Using the Tracks API](https://developers.google.com/cast/docs/android_sender#tracks)
+for more details.
 
 The first step is to define a track. The `MediaTrack` class represents a track,
 and you can define a track using the builder pattern:
@@ -969,9 +982,11 @@ There are situations where an application needs to authorize a user before it
 allows the playback of content. The CCL library has certain hooks and mechanisms
 in place to help with this process. Here is a list of steps:
 
-1. Client applications need to provide an implementation of `MediaAuthService`.
-The implementation is responsible for setting up the process internally but
-should not start the authorization process until its `start()` method is called.
+1. Client applications need to provide an implementation of `MediaAuthService`
+(despite the name, this has nothing to do with an Android service; it can be
+just a POJO). The implementation is responsible for setting up the process
+internally but should not start the authorization process until its `start()`
+method is called.
 
 2. When ready, the client application needs to call the following library method
 and pass the implementation of the interface to the framework:
@@ -1096,7 +1111,9 @@ per se.
   PendingIntent in the notification service. CCL can handle this for you if you
   declare the correct parent activity in the manifest. You need to enter the
   name of that activity (possibly a fully qualified name) in place of
-  `*PARENT_ACTIVITY*` in the above snippet.
+  `*PARENT_ACTIVITY*` in the above snippet. See
+  [Notifications](http://developer.android.com/guide/topics/ui/notifiers/notifications.html#NotificationResponse)
+  for more information.
 
 	The `VideoCastControllerActivity` is best presented if you use an overlay
 	Action Bar theme. The CastVideos reference app defines one
