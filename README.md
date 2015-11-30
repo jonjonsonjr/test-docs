@@ -5,9 +5,9 @@
   - [Dependencies and Project Setup](#dependencies-and-project-setup)
 - [How to Use the Cast Companion Library](#how-to-use-the-cast-companion-library)
   - [Initializing VideoCastManager](#initializing-videocastmanager)
-  - [Adding Cast Button to Action Bar/Toolbar](#adding-cast-button-to-action-bartoolbar)
-  - [Adding MediaRouteButton](#adding-mediaroutebutton)
-  - [Adding Mini-Controller](#adding-mini-controller)
+  - [Adding a Cast Button to the Action Bar/Toolbar](#adding-a-cast-button-to-the-action-bartoolbar)
+  - [Adding a MediaRouteButton](#adding-a-mediaroutebutton)
+  - [Adding a Mini-Controller](#adding-a-mini-controller)
   - [Notifications](#notifications)
   - [Lock Screen Controllers and Volume](#lock-screen-controllers-and-volume)
   - [Cast Player Screen](#cast-player-screen)
@@ -41,7 +41,8 @@ CCL is written with the following objectives in mind:
 - To provide a wrapper around the Cast SDK and related Google Play Services to
 hide the mundane tasks that are needed for casting.
 - To provide a collection of ready-to-use Cast-related components and features
-that are strongly recommended by the UX Guidelines.
+that are strongly recommended by the
+[UX Guidelines](https://developers.google.com/cast/docs/ux_guidelines).
 - To provide an example of how the Cast SDK can be used to accomplish more
 complex tasks.
 
@@ -58,12 +59,13 @@ Features that CCL provides for media-centric applications:
 - Player Control while casting
 - Global access via Mini-Controller
 - Pain-free session recovery, including the reconnection logic outlined in the
-UX guideline
+UX guidelines
 - A single custom data channel for sending and receiving custom data
 - Ability to check the installed Google Play services for compatibility
 - Handling media tracks, including settings page for all versions of Android
-- Handling changes to the volume of the cast device using the hard volume button
-inside and outside of the app, even on lock screen or when the screen is off
+- Handling changes to the volume of the cast device using the hard volume
+buttons inside and outside of the app, even on the lock screen or when the
+screen is off
 
 Features that CCL provides for data-centric applications:
 - Wrapper for device discovery
@@ -72,21 +74,21 @@ Features that CCL provides for data-centric applications:
 - Ability to check the installed Google Play services for compatibility
 
 In the subsequent sections, we will describe how each of these features can be
-accessed by an application. In what follows, we use "client" to refer to the
-application that uses CCL.
+accessed by an application. We will use "client" to refer to an application that
+uses CCL.
 
 ## Overall Design
 
 Most of this document focuses on media-centric applications. Toward the end, we
 discuss how data-centric applications can use this library.
 
-To maintain the state of the application in regards to connectivity to a Cast
+To maintain the state of the application regarding connectivity to a Cast
 device, there needs to be a central entity that transcends the lifecycles of
 individual activities in the application. The CCL’s main component, the
-`VideoCastManager` is the entity that does that (`DataCastManager` is the
-corresponding component for data-centric use cases).
+`VideoCastManager` is the entity that does that. (`DataCastManager` is a similar
+component for data-centric use cases.)
 
-This singleton class is responsible for managing the majority of the work by:
+This class is responsible for managing most of the work by:
 - Providing a rich set of APIs and callbacks.
 - Maintaining the state of the system, such as:
   - Connectivity to the Cast device
@@ -95,8 +97,8 @@ This singleton class is responsible for managing the majority of the work by:
   - The CCL Notification Service
   - The Mini-Controller
 
-In order to have a notification that lasts even if the client application is
-killed while casting, CCL starts a Cast Notification Service.
+In order to have a notification that persists when the client application is
+killed, CCL starts a Cast Notification Service.
 
 The [Cast UX guidelines](https://developers.google.com/cast/docs/ux_guidelines)
 request that the system notification for a Cast application be visible only when
@@ -119,8 +121,8 @@ detail in subsequent sections:
   components of CCL to manage the state of a video-centric application.
 
 - `VideoCastNotificationService`
-  - A local service that allows notifications to appear when needed beyond the
-  availability of the main application.
+  - A local service that allows notifications to appear beyond the availability
+  of the main application.
 
 - `MiniController`
   - A compound control that provides a Mini-Controller for the client.
@@ -134,7 +136,7 @@ detail in subsequent sections:
   - Another concrete subclass of the `BaseCastManager`.
   - Designed specifically for data-centeric applications, this is a singleton
   that clients interact with directly. Internally, it uses other classes and
-  components of CCL to manage the state of a data-centric application
+  components of CCL to manage the state of a data-centric application.
   - Provides means to register one or more namespaces for data communication
   between a sender client and a receiver application.
 
@@ -143,13 +145,18 @@ detail in subsequent sections:
   is lost.
 
 The MediaRouter and Cast SDK, in collaboration with Google Play Services,
-provide a collection of asynchronous calls that starts with the discovery method
-and continues to route selection, device connection, `RemoteMediaPlayer`
-creation, etc. For each of these asynchronous calls, there are one or more
-callbacks that inform the caller of the success or failure of the API calls and
-are generally a signal that moving to the next call is safe. Not all the
-activities or components in a client app are interested in receiving all the
-callbacks. CCL makes it easy for client components to register for a subset of
+provide a collection of asynchronous calls that assist in, for example,
+
+- the discovery method,
+- route selection,
+- device connection,
+- and `RemoteMediaPlayer` creation.
+
+For each of these asynchronous calls, there are one or more callbacks that
+inform the caller of the success or failure of the API calls. They are
+generally a signal that it is safe to move to the next call. Not all the
+activities or components in a client app are interested in receiving every
+callback. CCL makes it easy for client components to register for a subset of
 callbacks based on their needs. Although most of the Cast API calls are made by
 CCL, clients can choose to be notified of all relevant events and callbacks.
 
@@ -160,29 +167,28 @@ List of dependencies:
 - android-support-v7-mediarouter
 - Google Play Services (the Base and Cast components)
 
-_**Remark.** Make sure you use the v7 support version of the MediaRouter
+_**Note:** Make sure you use the v7 support version of the MediaRouter
 library and not the one that is included in the Android framework._
 
 Since the two support libraries contribute resources as well, you cannot simply
-satisfy the dependency by including their jar files; instead you need to import
+satisfy the dependency by including their jar files; instead, you must import
 them as library projects in Eclipse or in AAR packaged format in Android Studio.
-See the Support Library
-[Setup](http://developer.android.com/tools/support-library/setup.html) for how
-to do this.
+See the
+[Support Library Setup](http://developer.android.com/tools/support-library/setup.html)
+for how to do this.
 
-Your client project needs to list CCL as its only dependency for Cast related
-functionalities. In other words, your client application does not need to
+Your client project only needs to list CCL as its dependency for Cast-related
+functionality. In other words, your client application does not need to
 directly import or declare a dependency on the support libraries mentioned
-above since CCL brings those dependencies along.
+above, since CCL brings those dependencies along.
 
 Since Cast APIs are mainly provided by Google Play Services, the CCL library
 provides a convenient static method that all client applications should call at
 startup to verify that a compatible version of the Google Play Services is
 available on the device. If Google Play Services is missing or needs to be
 updated, a dialog will inform user and direct her to go to the Play Store to
-download/update the appropriate version. If, however, Google Play Services is
-installed but not enabled, it will direct the user to the device settings page
-to address the issue.
+download/update the appropriate version. If Google Play Services is installed
+but not enabled, it will direct her to the device settings page to enable it.
 
 To enable this important validation check, here is sample code to call this
 functionality in the `onCreate()` of the launcher Activity of your application:
@@ -199,15 +205,16 @@ protected void onCreate(Bundle savedInstanceState) {
 ## How to Use the Cast Companion Library
 
 For this example, we will mainly focus on video-centric applications and use the
-`VideoCastManager`, but in many cases the same applies to the `DataCastManager`.
+`VideoCastManager`, but in many cases the instructions apply to the
+`DataCastManager` as well.
 
 ### Initializing `VideoCastManager`
 
 The client application needs to instantiate and initialize an instance of
 `VideoCastManager` as early as possible. During the initialization step, the
-client should provide certain information that CCL needs to perform its tasks.
-We recommend you do this step in the `onCreate()` method of you Application
-class, so it can easily access it in all activities of your application.
+client should provide certain information to CCL. We recommend you do this step
+in the `onCreate()` method of you Application class, so it can easily access it
+in all activities of your application.
 
 The following snippet shows how the
 [CastVideos-android](https://github.com/googlecast/CastVideos-android)
@@ -233,10 +240,8 @@ The static `VideoCastManager.initialize()` method takes four arguments:
 
 2. An application ID
 
-3. An activity that provides the "Player Control" functionality and a custom
-namespace (explained later on). If a client wants CCL to provide its default
-Player Control page, the third argument to `initialize()` should be set to
-`null`.
+3. An activity that provides the "Player Control" functionality. If you want CCL
+to provide its default Player Control page, make this `null`.
 
 4. A namespace for a custom data channel. Leave this as `null` if no custom data
 channel is required. See the section on
@@ -261,8 +266,8 @@ Currently there are six features that can be turned on:
 6. Logging in the Google Play Services
 
 To specify which features should be enabled, construct an OR-ed expression of
-the desired features and pass that to the `enableFeatures` method. Note that all
-features are disabled by default.
+the desired features and pass that to the `enableFeatures` method (as shown in
+the snippet above). Note that all features are disabled by default.
 
 After this initialization, you can access this singleton instance by calling:
 
@@ -270,18 +275,17 @@ After this initialization, you can access this singleton instance by calling:
 mCastManager = VideoCastManager.getInstance();
 ```
 
-_**Remark.** In performing certain tasks, CCL needs to have a reference to the
-Application Context instance from the client application (for example, to access
-client resources or system services). Any action that requires an Activity
-Context will ask for one from the client in its API call._
+_**Remark:** In performing certain tasks, CCL needs to have a reference to the
+Application Context instance from the client application. Any action that
+requires an Activity Context will ask for one from the client in its API call._
 
-### Adding Cast Button to Action Bar/Toolbar
+### Adding a Cast Button to the Action Bar/Toolbar
 
-After setting up `VideoCastManager`, the next step is to put the Cast button in
-the Action Bar or Toolbar. We assume that your activity is a direct or indirect
-subclass of `AppCompatActivity`, from the appcompat-v7 library (if your Activity
-inherits from `FragmentActivity` see the next section for
-[adding a `MediaRouteButton`](#adding-mediaroutebutton)).
+After setting up the `VideoCastManager`, the next step is to put the Cast button
+in the Action Bar or Toolbar. We assume that your activity is a direct or
+indirect subclass of `AppCompatActivity`, from the appcompat-v7 library (if your
+activity inherits from `FragmentActivity` see the next section for
+[adding a `MediaRouteButton`](#adding-a-mediaroutebutton)).
 
 1. Add the following snippet to the xml file that defines your menu:
 
@@ -308,14 +312,14 @@ inherits from `FragmentActivity` see the next section for
 	Note that the method `addMediaRouterButton` returns a reference to the
   `MenuItem` that represents the Cast button if you need to access it.
 
-3. In the `onResume()` of your activity, add the following snippet:
+3. In the `onResume()` method of your activity, add the following snippet:
 
 	```java
 	mCastManager = VideoCastManager.getInstance();
 	mCastManager.incrementUiCounter();
 	```
 
-	and in `onPause()`, call:
+	and in `onPause()`, add:
 
 	```java
 	mCastManager.decrementUiCounter();
@@ -328,7 +332,7 @@ CCL also provides a custom Cast MediaRouter dialog when the client is connected:
 
 ![Cast MediaRouter dialog](img/mediarouter_dialog.png)
 
-### Adding MediaRouteButton
+### Adding a MediaRouteButton
 
 If your activity inherits (directly or indirectly) from `FragmentActivity`,
 you can use a `MediaRouteButton`. Add a snippet like this to your layout:
@@ -373,7 +377,7 @@ first). Use the following snippet to set the initial state:
 mMediaRouteButton.setVisibility(mVideoCasrManager.isRouteAvailable() ? View.VISIBLE : View.INVISIBLE);
 ```
 
-### Adding Mini-Controller
+### Adding a Mini-Controller
 
 ![Mini-Controller](img/mini_controller.png)
 
@@ -383,13 +387,13 @@ The Mini-Controller is a small, persistent component that enables users to:
 - perform basic operations on the remote media (such as play/pause),
 - and get back to the Cast Player page (by clicking on album art).
 
-It also provides an extended component to show the "upcoming" item in your queue
-if you have a queue with auto-play turned on. The Mini-Controller should be
-visible **if and only if** the remote video is playing. For audio-only content
-such as music, you might need to have to component available for local playback.
+It also provides an extended component to show the "upcoming" item if you have a
+queue with auto-play turned on. The Mini-Controller should be visible **if and
+only if** remote media is playing. For audio-only content such as music, you
+might need to have to component available for local playback.
 
-CCL provides a compound component for the Mini-Controller that can be added to
-the layout XML of your pages. Here is an example:
+CCL provides a component for the Mini-Controller that can be added to the layout
+XML of your pages. Here is an example:
 
 ```xml
 <com.google.sample.castcompanionlibrary.widgets.MiniController
@@ -405,15 +409,15 @@ the layout XML of your pages. Here is an example:
 
 To configure this component, you have two choices:
 
-1. Using `auto_setup="true"`. If you set this xml attribute to `true`, then no
+1. Using `auto_setup="true"`. If you set this xml attribute to `true`, no
 additional work is required.  This is the preferred approach.
 
 2. Manual configuration. If you set `auto_setup="false"` (this is the default
-value for this attribute), then the client application needs to register this
-component so that the library can manage its visibility, state and content.
+value for this attribute), the client application needs to register this
+component so that the library can manage its visibility, state, and content.
 Additionally, the client application is responsible for unregistering this
-component when it is not needed. To register this component with the instance of
-`VideoCastManager`, add the following lines to your activity's `onCreate()`:
+component when it is not needed. To register this component with the
+`VideoCastManager`, add the following to your activity's `onCreate()` method:
 
 	```java
 	mMiniController = (MiniController) findViewById(R.id.miniController);
@@ -421,7 +425,7 @@ component when it is not needed. To register this component with the instance of
 	```
 
 	Remember to unregister this component when you are done by adding the
-	following line to `onDestroy()`:
+	following line to the `onDestroy()` method:
 
 	```java
 	mCastManager.removeMiniController(mMiniController);
@@ -435,10 +439,10 @@ the `VideoCastManager` handles:
 application from the Cast device, it will hide this component).
 
 Note that the play/pause/stop buttons are drawables that are defined as aliases
-to the real assets so you can easily customize them in your application if
+to the real assets, so you can easily customize them in your application if
 needed. These aliases can be found in the res/drawable directory of the CCL and
-are named as `ic_mini_controller_pause`, etc.). You can copy those aliases to
-your application and change what they point to.
+are named `ic_mini_controller_pause`, etc.). You can copy these aliases to your
+application and change what they point to.
 
 When you are playing a queue of items and auto-play is on, this component shows
 an extended area when an upcoming item starts preloading on the receiver. This
@@ -450,18 +454,18 @@ the current item will not be changed).
 
 ## Notifications
 
-Notifications will be managed for you if you enabled that feature after
-initializing the `VideoCastManager`. The flag to do that is
+Notifications will be managed for you if you enabled that feature for the
+`VideoCastManager`. The flag to do that is
 `VideoCastManager.FEATURE_NOTIFICATION`. You need to help CCL discover when the
 client application is visible (to hide the notification) and when it is in the
 background (to show the notification). This can be accomplished by adding the
-following line to your `onResume()`:
+following line to your `onResume()` method:
 
 ```java
 mCastManager.incrementUiCounter();
 ```
 
-and the following line to `onPause()` of all your activities:
+and the following line to the `onPause()` method of all your activities:
 
 ```java
 mCastManager.decrementUiCounter();
@@ -477,17 +481,18 @@ internally.
 CCL can provide default lock screen controllers based on the combination of
 `NotificationCompat.MediaStyle` and `MediaSessionCompat`. This feature needs to
 be enabled soon after the initialization of `VideoCastManager` by using the flag
-`VideoCastManager.FEATURE_LOCKSCREEN`. When this feature is enabled, a
-Play/Pause button will be shown on the lock screen of Android devices running
-Jelly Bean or above. On KitKat+ devices, the layout of the lock screen
-controllers is different and uses full-screen album art, while on Jelly Bean it
-uses a small version of the album art. CCL also makes sure that on Lollipop and
-above, the appropriate Lock Screen controllers are added (based on
+`VideoCastManager.FEATURE_LOCKSCREEN`.
+
+When this feature is enabled, a Play/Pause button will be shown on the lock
+screen of Android devices running Jelly Bean+. On KitKat+ devices, the layout of
+the lock screen controllers is different and uses full-screen album art, while
+on Jelly Bean it uses a small version of the album art. CCL also makes sure that
+on Lollipop+, the appropriate Lock Screen controllers are added (based on
 `NotificationCompat.MediaStyle`).
 
-When this feature is enabled, CCL provides the ability for users to control the
-system volume of the Cast device even if the application is in the background.
-On KitKat+ devices, it provides that capability even if the screen is off.
+CCL also provides the ability for users to control the system volume of the Cast
+device even if the application is in the background. On KitKat+ devices, this
+works even if the screen is off.
 
 ### Cast Player Screen
 
@@ -509,15 +514,15 @@ simple mechanism for you to launch that screen:
 mCastManager.startCastControllerActivity(context, mSelectedMedia, position, autoPlay);
 ```
 
-Here, `mSelectedMedia` is the `MediaInfo` object that represents the media you
+Here, `mSelectedMedia` is a `MediaInfo` object that represents the media you
 want to cast, `position` (integer) is the starting point of the video, and
 `autoPlay` (boolean) signals whether or not you want to automatically start
 playback of the media.
 
-This component can handle Queues and also provide controls for navigating
+This component can handle queues and also provides controls for navigating
 through queue items.
 
-_**Remark 1.** To have all the metadata for a movie available when needed, you
+_**Remark 1:** To have all the metadata for a movie available when needed, you
 need to build and populate an instance of
 [`MediaInfo`](https://developers.google.com/android/reference/com/google/android/gms/cast/MediaInfo)
 to represent the video. The fields are:_
@@ -533,18 +538,17 @@ to represent the video. The fields are:_
 contentId (populate this with the URL pointing to the media)
 - contentType: e.g. "video/mp4"
 - streamType: typically of type `MediaInfo.STREAM_TYPE_BUFFERED`
-- MediaTracks: Closed caption and tracks information, if available. See the
-section on
+- MediaTracks: Closed caption and tracks information. See the section on
 [Handling Tracks and Closed Captions](#handling-tracks-and-closed-captions).
 
-_**Remark 2.** It is very tempting to try to pass around MediaInfo objects
+_**Remark 2:** It is very tempting to try to pass around MediaInfo objects
 between activities. For example, if the user is browsing a catalog and selects a
-video to be taken to an activity with detailed info on the video, you might want
-to pass the MediaInfo that represents that video to the next activity.
-Unfortunately, MediaInfo is neither `Serializable` nor `Parcelable` so you
-cannot pass that in an intent; however, CCL uses a simple `Bundle` to wrap the
-`MediaInfo`, and provides two static utility methods `Utils.bundleToMediaInfo()`
-and `Utils.mediaInfoToBundle()` to convert between the two types:_
+video, you might want to pass the MediaInfo that represents that video to the
+next activity. Unfortunately, MediaInfo is neither `Serializable` nor
+`Parcelable` so you cannot pass that in an intent; however, CCL uses a simple
+`Bundle` to wrap the `MediaInfo`, and provides two static utility methods
+`Utils.bundleToMediaInfo()` and `Utils.mediaInfoToBundle()` to convert between
+the two types:_
 
 ```java
 public static Bundle mediaInfoToBundle(MediaInfo info);
@@ -553,7 +557,8 @@ public static MediaInfo bundleToMediaInfo(Bundle wrapper);
 
 #### Volume Control
 
-CCL provides an easy way for developers control volume in their applications.
+CCL provides an easy way for developers to control volume in their applications.
+
 Inside an activity, you can override `dispatchKeyEvent()`:
 
 ```java
@@ -564,11 +569,11 @@ public boolean dispatchKeyEvent(KeyEvent event) {
 }
 ```
 
-CCL will handle the rest, i.e., it enables controlling the cast volume through
+CCL will handle the rest, i.e. it enables controlling the cast volume through
 the hard volume buttons on the phone and shows a visual volume bar on supported
 versions. If `FEATURE_LOCKSCREEN` was enabled during the initialization of the
 `VideoCastManager`, CCL handles changing volume through the hard volume buttons
-even if your app is not in the foreground, the device is locked, or even if the
+if your app is not in the foreground, if the device is locked, or even if the
 screen is off. In the above snippet, `VOLUME_INCREMENT` is a value you set in
 your application that you need to tell CCL about by calling the following at an
 early stage, preferably at the initialization time:
@@ -580,7 +585,7 @@ mCastManager.setVolumeStep(VOLUME_INCREMENT);
 The recommended value for `VOLUME_INCREMENT` is 0.05 when targeting a TV and
 0.03 when targeting an audio-only device.
 
-_**Remark 3.** If you are targeting Android versions ICS and above, you do not
+_**Remark 3:** If you are targeting Android versions ICS and above, you do not
 need to override the `dispatchKeyEvent` at all; `MediaSessionCompat` will handle
 this automatically. If you need to support GingerBread, this change is required
 and only works when you app is in the foreground._
@@ -666,8 +671,8 @@ MediaTrack englishSubtitle = new MediaTrack.Builder(1 /* ID */, MediaTrack.TYPE_
 ```
 
 Note that the first argument to the Builder is a unique ID that the application
-(not the SDK) defines and assigns to a track so that subsequent APIs can refer
-to the track.
+(not the SDK) defines and assigns to a track so that subsequent API calls can
+refer to the it.
 
 The next step is to add one or more tracks to a video. This should happen before
 loading the media; any changes made to the tracks after loading the media will
@@ -773,7 +778,7 @@ TracksChooserDialog.newInstance(mMediaInfo) .show(mFragmentManager /* e.g. getSu
 
 This dialog allows user to select a Text track or an Audio track. CCL notifies
 any components registered to receive such information. To register a component,
-implement the interface `OnTracksSelectedListener` and use the following API to
+implement the interface `OnTracksSelectedListener` and use the following APIs to
 start listening:
 
 ```java
@@ -803,9 +808,9 @@ APIs that CCL provides to manage the queue, such as load, update, insert,
 delete, shuffle, etc. The receiver SDK creates a queue even if one single item
 is loaded using the normal load command (vs `queueLoad()`).
 
-CCL provides a number of callbacks to update the clients on changes to the
-queue, such as `onMediaQueueUpdated()`. In addition, when you have a queue of
-video items with adaptive bitrate (such as a queue of HLS streams), you can take
+CCL provides a number of callbacks to update clients on changes to the queue,
+such as `onMediaQueueUpdated()`. In addition, when you have a queue of video
+items with adaptive bitrate (such as a queue of HLS streams), you can take
 advantage of "preload" feature which allows you to preload the next video when
 the the currently playing item finishes downloading; this allows a much smoother
 transition from one queue item to the next.
@@ -823,11 +828,10 @@ sender and receiver applications. For example, a sender application may need to
 provide a mechanism for its users to give a thumbs-up or thumbs-down when they
 are watching content. This type of communication requires a custom data channel.
 
-To facilitate this, the last argument to the `initialize()` call of the
-`VideoCastManager` can be used. You can choose a namespace and pass that in as
-the last argument. CCL will then set up the sender part of the data channel and
-provide a single API for you to send a message to the receiver
-(`sendDataMessage()`) and two callbacks:
+To do this, you can use the last argument to `VideoCastManager.initialize()`.
+You can choose a namespace and pass that in as the last argument. CCL will then
+set up the sender part of the data channel and provide a single API for you to
+send a message to the receiver (`sendDataMessage()`) and two callbacks:
 
 1. `onDataMessageReceived()` - called when the receiver receives a message
 2. `onDataMessageSendFailed()` - called if the send command encounters an error
@@ -835,15 +839,15 @@ provide a single API for you to send a message to the receiver
 CCL also provides an API for you to remove your custom data channel
 (`removeDataChannel()`), but does the appropriate clean up for you when you
 disconnect from a device. Refer to the library's JavaDoc for documentation on
-these APIs and callbacks. Note that you would need to have a custom receiver to
-be able to send and receive messages using your custom namespace.
+these APIs and callbacks. Note that you need a custom receiver to send and
+receive messages using your custom namespace.
 
 ## Support for data-centric applications
 
 If you are working with an application that is mainly data-centric and needs one
 or more custom data channels but no media data channel, you can initialize and
-use a different class in the library, the `DataCastManager`. This class is the
-equivalent of the `VideoCastManager` and behaves similarly when you are setting
+use a different class in the library, the `DataCastManager`. This class is
+equivalent to the `VideoCastManager` and behaves similarly when you are setting
 it up.
 
 To initialize this class, call the following method:
@@ -906,11 +910,11 @@ mCastManager.addVideoCastConsumer(new VideoCastConsumerImpl() {
 });
 ```
 
-_**Remark 1.** In order to use the custom data channels properly, you must
+_**Remark 1:** In order to use the custom data channels properly, you must
 implement the custom data related methods of these interfaces to receive
 messages from the receiver._
 
-_**Remark 2.** Most methods in these two interfaces have no return values.
+_**Remark 2:** Most methods in these two interfaces have no return values.
 However, there are few of them that return a boolean. These methods are related
 to failures in various stages (for example "launching application failed"). CCL
 can provide a standard error dialog for your application if your implementation
@@ -918,7 +922,7 @@ of these methods returns `true` (that is the behavior of the default
 implementation classes). If you want to provide your own error dialogs, make
 sure you override these methods and return `false`._
 
-_**Remark 3.** All the lifecycle callbacks are called on the Main (i.e. UI)
+_**Remark 3:** All the lifecycle callbacks are called on the Main (i.e. UI)
 Thread unless stated otherwise._
 
 ## Advanced Topics
